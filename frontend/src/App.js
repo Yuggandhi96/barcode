@@ -132,34 +132,97 @@ const BarcodeGeneratorApp = () => {
     }
   };
 
+  // Barcode type icons and descriptions
+  const getBarcodeTypeInfo = (type) => {
+    const typeInfo = {
+      qr_code: {
+        icon: "📱",
+        description: "Quick Response codes for digital content",
+        features: ["Mobile-friendly", "High capacity", "Error correction"]
+      },
+      code128: {
+        icon: "📊",
+        description: "Linear barcode for alphanumeric data",
+        features: ["High density", "Variable length", "Widely supported"]
+      },
+      ean13: {
+        icon: "🛍️",
+        description: "European Article Number for retail",
+        features: ["Retail standard", "13 digits", "Global recognition"]
+      },
+      upc: {
+        icon: "🏪",
+        description: "Universal Product Code for products",
+        features: ["US/Canada standard", "12 digits", "Point of sale"]
+      },
+      code39: {
+        icon: "🏭",
+        description: "Code 39 for industrial applications",
+        features: ["Alphanumeric", "Self-checking", "Industrial use"]
+      },
+      datamatrix: {
+        icon: "🔲",
+        description: "2D matrix code for small items",
+        features: ["Compact size", "High reliability", "Small parts marking"]
+      }
+    };
+    return typeInfo[type] || { icon: "📋", description: "Professional barcode", features: [] };
+  };
+
   // Step 1: Barcode Type Selection
   const renderStep1 = () => (
     <div className="step-container">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Select Barcode Type</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Object.entries(barcodeTypes).map(([key, type]) => (
-          <div
-            key={key}
-            className={`p-6 border-2 rounded-lg cursor-pointer transition-all duration-300 hover:shadow-lg ${
-              formData.barcodeType === key
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-300'
-            }`}
-            onClick={() => handleInputChange('barcodeType', key)}
-          >
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{type.name}</h3>
-            <p className="text-2xl font-bold text-blue-600">${type.price}</p>
-            <p className="text-sm text-gray-600 mt-2">per barcode</p>
-          </div>
-        ))}
+      <div className="step-header">
+        <h2 className="step-title">Choose Your Barcode Type</h2>
+        <p className="step-subtitle">Select the perfect barcode format for your needs</p>
       </div>
-      <div className="mt-8 flex justify-center">
+      
+      <div className="barcode-grid">
+        {Object.entries(barcodeTypes).map(([key, type]) => {
+          const typeInfo = getBarcodeTypeInfo(key);
+          return (
+            <div
+              key={key}
+              className={`barcode-card ${formData.barcodeType === key ? 'selected' : ''}`}
+              onClick={() => handleInputChange('barcodeType', key)}
+            >
+              <div className="barcode-card-header">
+                <span className="barcode-icon">{typeInfo.icon}</span>
+                <h3 className="barcode-title">{type.name}</h3>
+              </div>
+              
+              <div className="barcode-price">
+                <span className="price-currency">$</span>
+                <span className="price-amount">{type.price}</span>
+                <span className="price-unit">per code</span>
+              </div>
+              
+              <p className="barcode-description">{typeInfo.description}</p>
+              
+              <div className="barcode-features">
+                {typeInfo.features.map((feature, idx) => (
+                  <span key={idx} className="feature-tag">{feature}</span>
+                ))}
+              </div>
+              
+              <div className="barcode-card-footer">
+                <button className="select-btn">
+                  {formData.barcodeType === key ? 'Selected ✓' : 'Select'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="step-actions">
         <button
           onClick={() => handleStepChange(2)}
           disabled={!formData.barcodeType}
-          className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors duration-300"
+          className="btn-primary btn-next"
         >
-          Next: Select Quantity
+          Continue to Quantity
+          <span className="btn-arrow">→</span>
         </button>
       </div>
     </div>
@@ -168,44 +231,80 @@ const BarcodeGeneratorApp = () => {
   // Step 2: Quantity Selection
   const renderStep2 = () => (
     <div className="step-container">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Select Quantity</h2>
-      <div className="max-w-md mx-auto">
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Selected Type: {barcodeTypes[formData.barcodeType]?.name}
-          </label>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Quantity
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="10000"
-            value={formData.quantity}
-            onChange={(e) => {
-              const quantity = parseInt(e.target.value) || 1;
-              handleInputChange('quantity', quantity);
-              if (quantity > 0) {
+      <div className="step-header">
+        <h2 className="step-title">How Many Barcodes?</h2>
+        <p className="step-subtitle">Choose your quantity and see live pricing</p>
+      </div>
+      
+      <div className="quantity-section">
+        <div className="selected-type-info">
+          <span className="selected-icon">{getBarcodeTypeInfo(formData.barcodeType).icon}</span>
+          <div>
+            <h3 className="selected-type">{barcodeTypes[formData.barcodeType]?.name}</h3>
+            <p className="selected-description">{getBarcodeTypeInfo(formData.barcodeType).description}</p>
+          </div>
+        </div>
+        
+        <div className="quantity-input-container">
+          <label className="quantity-label">Quantity</label>
+          <div className="quantity-controls">
+            <button 
+              className="quantity-btn"
+              onClick={() => {
+                const newQuantity = Math.max(1, formData.quantity - 1);
+                handleInputChange('quantity', newQuantity);
+                if (newQuantity > 0) calculatePrice();
+              }}
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min="1"
+              max="10000"
+              value={formData.quantity}
+              onChange={(e) => {
+                const quantity = parseInt(e.target.value) || 1;
+                handleInputChange('quantity', quantity);
+                if (quantity > 0) calculatePrice();
+              }}
+              className="quantity-input"
+            />
+            <button 
+              className="quantity-btn"
+              onClick={() => {
+                const newQuantity = Math.min(10000, formData.quantity + 1);
+                handleInputChange('quantity', newQuantity);
                 calculatePrice();
-              }
-            }}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl font-semibold"
-          />
+              }}
+            >
+              +
+            </button>
+          </div>
+          <p className="quantity-note">Min: 1 • Max: 10,000</p>
         </div>
         
         {pricing && (
-          <div className="bg-gray-50 p-6 rounded-lg mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Price Breakdown</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Base Amount:</span>
+          <div className="pricing-breakdown">
+            <h3 className="pricing-title">Price Breakdown</h3>
+            <div className="pricing-details">
+              <div className="pricing-row">
+                <span>Unit Price:</span>
+                <span>${barcodeTypes[formData.barcodeType]?.price}</span>
+              </div>
+              <div className="pricing-row">
+                <span>Quantity:</span>
+                <span>{formData.quantity}</span>
+              </div>
+              <div className="pricing-row">
+                <span>Subtotal:</span>
                 <span>${pricing.base_amount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="pricing-row">
                 <span>Tax ({pricing.igst ? 'IGST' : 'CGST + SGST'}):</span>
                 <span>${pricing.tax_amount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-lg border-t pt-2">
+              <div className="pricing-row total">
                 <span>Total Amount:</span>
                 <span>${pricing.total_amount.toFixed(2)}</span>
               </div>
@@ -214,19 +313,20 @@ const BarcodeGeneratorApp = () => {
         )}
       </div>
       
-      <div className="flex justify-center space-x-4">
+      <div className="step-actions">
         <button
           onClick={() => handleStepChange(1)}
-          className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors duration-300"
+          className="btn-secondary btn-back"
         >
-          Back
+          ← Back
         </button>
         <button
           onClick={() => handleStepChange(3)}
           disabled={!formData.quantity || formData.quantity <= 0}
-          className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors duration-300"
+          className="btn-primary btn-next"
         >
-          Next: Customer Details
+          Continue to Details
+          <span className="btn-arrow">→</span>
         </button>
       </div>
     </div>
@@ -235,145 +335,155 @@ const BarcodeGeneratorApp = () => {
   // Step 3: Customer Details Form
   const renderStep3 = () => (
     <div className="step-container">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Customer Details</h2>
-      <div className="max-w-2xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Name *
-            </label>
-            <input
-              type="text"
-              value={formData.customerDetails.name}
-              onChange={(e) => handleInputChange('customerDetails.name', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
+      <div className="step-header">
+        <h2 className="step-title">Your Information</h2>
+        <p className="step-subtitle">We need these details for your order and invoice</p>
+      </div>
+      
+      <form className="customer-form">
+        <div className="form-section">
+          <h3 className="form-section-title">👤 Personal Information</h3>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">First Name *</label>
+              <input
+                type="text"
+                value={formData.customerDetails.name}
+                onChange={(e) => handleInputChange('customerDetails.name', e.target.value)}
+                className="form-input"
+                placeholder="Enter your first name"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Last Name *</label>
+              <input
+                type="text"
+                value={formData.customerDetails.surname}
+                onChange={(e) => handleInputChange('customerDetails.surname', e.target.value)}
+                className="form-input"
+                placeholder="Enter your last name"
+                required
+              />
+            </div>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Surname *
-            </label>
-            <input
-              type="text"
-              value={formData.customerDetails.surname}
-              onChange={(e) => handleInputChange('customerDetails.surname', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Organization *
-            </label>
-            <input
-              type="text"
-              value={formData.customerDetails.organization}
-              onChange={(e) => handleInputChange('customerDetails.organization', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Country *
-            </label>
-            <input
-              type="text"
-              value={formData.customerDetails.country}
-              onChange={(e) => handleInputChange('customerDetails.country', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              State
-            </label>
-            <input
-              type="text"
-              value={formData.customerDetails.state}
-              onChange={(e) => {
-                handleInputChange('customerDetails.state', e.target.value);
-                calculatePrice(); // Recalculate price when state changes
-              }}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter state (Gujarat for special tax rate)"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone (WhatsApp) *
-            </label>
-            <input
-              type="tel"
-              value={formData.customerDetails.phone}
-              onChange={(e) => handleInputChange('customerDetails.phone', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email *
-            </label>
+          <div className="form-group">
+            <label className="form-label">Email Address *</label>
             <input
               type="email"
               value={formData.customerDetails.email}
               onChange={(e) => handleInputChange('customerDetails.email', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="form-input"
+              placeholder="your@email.com"
               required
             />
           </div>
           
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Address *
-            </label>
-            <textarea
-              value={formData.customerDetails.address}
-              onChange={(e) => handleInputChange('customerDetails.address', e.target.value)}
-              rows="3"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              GST Number (if applicable)
-            </label>
+          <div className="form-group">
+            <label className="form-label">Phone Number (WhatsApp) *</label>
             <input
-              type="text"
-              value={formData.customerDetails.gst_number}
-              onChange={(e) => handleInputChange('customerDetails.gst_number', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter GST number if registered"
+              type="tel"
+              value={formData.customerDetails.phone}
+              onChange={(e) => handleInputChange('customerDetails.phone', e.target.value)}
+              className="form-input"
+              placeholder="+1 (555) 123-4567"
+              required
             />
           </div>
         </div>
         
-        <div className="flex justify-center space-x-4 mt-8">
-          <button
-            onClick={() => handleStepChange(2)}
-            className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors duration-300"
-          >
-            Back
-          </button>
-          <button
-            onClick={createOrder}
-            disabled={loading || !formData.customerDetails.name || !formData.customerDetails.email}
-            className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors duration-300"
-          >
-            {loading ? 'Creating Order...' : 'Create Order'}
-          </button>
+        <div className="form-section">
+          <h3 className="form-section-title">🏢 Business Information</h3>
+          <div className="form-group">
+            <label className="form-label">Organization *</label>
+            <input
+              type="text"
+              value={formData.customerDetails.organization}
+              onChange={(e) => handleInputChange('customerDetails.organization', e.target.value)}
+              className="form-input"
+              placeholder="Your company name"
+              required
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Country *</label>
+              <input
+                type="text"
+                value={formData.customerDetails.country}
+                onChange={(e) => handleInputChange('customerDetails.country', e.target.value)}
+                className="form-input"
+                placeholder="e.g., United States"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">State/Province</label>
+              <input
+                type="text"
+                value={formData.customerDetails.state}
+                onChange={(e) => {
+                  handleInputChange('customerDetails.state', e.target.value);
+                  calculatePrice();
+                }}
+                className="form-input"
+                placeholder="e.g., Gujarat (for special tax rate)"
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Business Address *</label>
+            <textarea
+              value={formData.customerDetails.address}
+              onChange={(e) => handleInputChange('customerDetails.address', e.target.value)}
+              className="form-textarea"
+              rows="3"
+              placeholder="Enter your complete business address"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">GST Number (Optional)</label>
+            <input
+              type="text"
+              value={formData.customerDetails.gst_number}
+              onChange={(e) => handleInputChange('customerDetails.gst_number', e.target.value)}
+              className="form-input"
+              placeholder="e.g., 24ABCDE1234F1Z5"
+            />
+            <p className="form-help">Required for businesses in India</p>
+          </div>
         </div>
+      </form>
+      
+      <div className="step-actions">
+        <button
+          onClick={() => handleStepChange(2)}
+          className="btn-secondary btn-back"
+        >
+          ← Back
+        </button>
+        <button
+          onClick={createOrder}
+          disabled={loading || !formData.customerDetails.name || !formData.customerDetails.email}
+          className="btn-primary btn-next"
+        >
+          {loading ? (
+            <>
+              <span className="loading-spinner"></span>
+              Creating Order...
+            </>
+          ) : (
+            <>
+              Create Order
+              <span className="btn-arrow">→</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
@@ -381,65 +491,102 @@ const BarcodeGeneratorApp = () => {
   // Step 4: Order Summary & Payment
   const renderStep4 = () => (
     <div className="step-container">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Order Summary</h2>
+      <div className="step-header">
+        <h2 className="step-title">Order Summary</h2>
+        <p className="step-subtitle">Review your order and generate barcodes</p>
+      </div>
+      
       {order && (
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white p-6 rounded-lg shadow-lg border">
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Order Details</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Order ID:</span>
-                  <span className="font-mono text-sm">{order.order_id}</span>
+        <div className="order-summary">
+          <div className="order-header">
+            <div className="order-id">
+              <span className="order-label">Order ID:</span>
+              <span className="order-value">{order.order_id}</span>
+            </div>
+            <div className="order-status">
+              <span className="status-badge">Ready to Generate</span>
+            </div>
+          </div>
+          
+          <div className="order-details-grid">
+            <div className="order-card">
+              <h3 className="card-title">📋 Order Details</h3>
+              <div className="order-item">
+                <span className="item-icon">{getBarcodeTypeInfo(formData.barcodeType).icon}</span>
+                <div className="item-details">
+                  <h4>{barcodeTypes[formData.barcodeType]?.name}</h4>
+                  <p>Quantity: {formData.quantity} codes</p>
                 </div>
-                <div className="flex justify-between">
-                  <span>Barcode Type:</span>
-                  <span>{barcodeTypes[formData.barcodeType]?.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Quantity:</span>
-                  <span>{formData.quantity}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Customer:</span>
-                  <span>{formData.customerDetails.name} {formData.customerDetails.surname}</span>
+                <div className="item-price">
+                  ${order.order.total_amount.toFixed(2)}
                 </div>
               </div>
             </div>
             
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Payment Details</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Base Amount:</span>
+            <div className="order-card">
+              <h3 className="card-title">👤 Customer Information</h3>
+              <div className="customer-info">
+                <p><strong>{formData.customerDetails.name} {formData.customerDetails.surname}</strong></p>
+                <p>{formData.customerDetails.organization}</p>
+                <p>{formData.customerDetails.email}</p>
+                <p>{formData.customerDetails.phone}</p>
+              </div>
+            </div>
+            
+            <div className="order-card">
+              <h3 className="card-title">💰 Payment Breakdown</h3>
+              <div className="payment-details">
+                <div className="payment-row">
+                  <span>Subtotal:</span>
                   <span>${order.order.total_amount.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Tax Amount:</span>
+                <div className="payment-row">
+                  <span>Tax:</span>
                   <span>${order.order.tax_amount.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg border-t pt-2">
-                  <span>Total Amount:</span>
+                <div className="payment-row total">
+                  <span>Total:</span>
                   <span>${order.order.final_amount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
-            
-            <div className="text-center">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <p className="text-yellow-800">
-                  <strong>Payment Integration Coming Soon!</strong><br/>
-                  For now, you can generate barcodes directly.
-                </p>
+          </div>
+          
+          <div className="payment-section">
+            <div className="payment-notice">
+              <div className="notice-icon">🔔</div>
+              <div className="notice-content">
+                <h4>Payment Integration Coming Soon!</h4>
+                <p>For now, you can generate and download your barcodes directly. Payment integration with Razorpay and PayPal will be added once API keys are provided.</p>
               </div>
-              
-              <button
-                onClick={processOrder}
-                disabled={loading}
-                className="w-full py-4 bg-green-600 text-white rounded-lg font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-green-700 transition-colors duration-300 text-lg"
-              >
-                {loading ? 'Generating Barcodes...' : 'Generate & Download Barcodes'}
-              </button>
+            </div>
+            
+            <button
+              onClick={processOrder}
+              disabled={loading}
+              className="btn-generate"
+            >
+              {loading ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Generating Barcodes...
+                </>
+              ) : (
+                <>
+                  <span className="generate-icon">🎯</span>
+                  Generate & Download Barcodes
+                </>
+              )}
+            </button>
+            
+            <div className="download-info">
+              <h4>📦 What you'll receive:</h4>
+              <ul>
+                <li>✅ Excel file with all barcode data</li>
+                <li>✅ Individual barcode images (PNG format)</li>
+                <li>✅ Invoice with order details</li>
+                <li>✅ Everything packaged in a convenient ZIP file</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -449,26 +596,28 @@ const BarcodeGeneratorApp = () => {
 
   // Progress indicator
   const renderProgressIndicator = () => (
-    <div className="flex justify-center mb-8">
-      <div className="flex items-center space-x-4">
-        {[1, 2, 3, 4].map((step) => (
-          <div key={step} className="flex items-center">
+    <div className="progress-container">
+      <div className="progress-bar">
+        <div 
+          className="progress-fill" 
+          style={{ width: `${(currentStep / 4) * 100}%` }}
+        ></div>
+      </div>
+      <div className="progress-steps">
+        {[
+          { step: 1, label: "Type", icon: "🎯" },
+          { step: 2, label: "Quantity", icon: "📊" },
+          { step: 3, label: "Details", icon: "📝" },
+          { step: 4, label: "Generate", icon: "🚀" }
+        ].map(({ step, label, icon }) => (
+          <div key={step} className="progress-step-container">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                currentStep >= step
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-600'
-              }`}
+              className={`progress-step ${currentStep >= step ? 'active' : ''} ${currentStep === step ? 'current' : ''}`}
             >
-              {step}
+              <span className="step-icon">{icon}</span>
+              <span className="step-number">{step}</span>
             </div>
-            {step < 4 && (
-              <div
-                className={`w-16 h-1 ${
-                  currentStep > step ? 'bg-blue-600' : 'bg-gray-200'
-                }`}
-              />
-            )}
+            <span className="step-label">{label}</span>
           </div>
         ))}
       </div>
@@ -476,26 +625,61 @@ const BarcodeGeneratorApp = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Barcode Generator Pro
-          </h1>
-          <p className="text-lg text-gray-600">
-            Generate professional barcodes on demand
-          </p>
+    <div className="app-container">
+      {/* Header */}
+      <header className="app-header">
+        <div className="header-content">
+          <div className="logo-section">
+            <h1 className="app-title">
+              <span className="logo-icon">📊</span>
+              BarcodeGen Pro
+            </h1>
+            <p className="app-tagline">Professional barcode generation made simple</p>
+          </div>
+          <div className="header-stats">
+            <div className="stat-item">
+              <span className="stat-number">6</span>
+              <span className="stat-label">Barcode Types</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">10K+</span>
+              <span className="stat-label">Max Quantity</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">⚡</span>
+              <span className="stat-label">Instant Download</span>
+            </div>
+          </div>
         </div>
-        
-        {renderProgressIndicator()}
-        
-        <div className="max-w-6xl mx-auto">
-          {currentStep === 1 && renderStep1()}
-          {currentStep === 2 && renderStep2()}
-          {currentStep === 3 && renderStep3()}
-          {currentStep === 4 && renderStep4()}
+      </header>
+
+      {/* Main Content */}
+      <main className="main-content">
+        <div className="container">
+          {renderProgressIndicator()}
+          
+          <div className="step-content">
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
+            {currentStep === 4 && renderStep4()}
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p>© 2024 BarcodeGen Pro. Professional barcode generation service.</p>
+          <div className="footer-links">
+            <span>Secure</span>
+            <span>•</span>
+            <span>Reliable</span>
+            <span>•</span>
+            <span>Fast</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
