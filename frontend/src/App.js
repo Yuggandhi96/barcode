@@ -5,7 +5,7 @@ import axios from "axios";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Multi-step form component
+// Professional Barcode Generator Application
 const BarcodeGeneratorApp = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [barcodeTypes, setBarcodeTypes] = useState({});
@@ -88,7 +88,7 @@ const BarcodeGeneratorApp = () => {
         quantity: formData.quantity,
         customer_details: {
           ...formData.customerDetails,
-          id: undefined // Let backend generate ID
+          id: undefined
         }
       };
 
@@ -112,7 +112,6 @@ const BarcodeGeneratorApp = () => {
         responseType: 'blob'
       });
       
-      // Create download link
       const blob = new Blob([response.data], { type: 'application/zip' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -132,295 +131,328 @@ const BarcodeGeneratorApp = () => {
     }
   };
 
-  // Barcode type icons and descriptions
+  // Professional barcode type configurations
   const getBarcodeTypeInfo = (type) => {
     const typeInfo = {
       qr_code: {
-        icon: "📱",
-        description: "Quick Response codes for digital content",
-        features: ["Mobile-friendly", "High capacity", "Error correction"]
+        title: "QR Code",
+        description: "Two-dimensional matrix barcode optimized for quick reading and high data capacity",
+        useCases: ["Digital content", "Mobile payments", "Contact information"],
+        specifications: "ISO/IEC 18004 standard"
       },
       code128: {
-        icon: "📊",
-        description: "Linear barcode for alphanumeric data",
-        features: ["High density", "Variable length", "Widely supported"]
+        title: "Code 128",
+        description: "High-density linear barcode supporting full ASCII character set",
+        useCases: ["Supply chain", "Shipping labels", "Inventory management"],
+        specifications: "Variable length, high density"
       },
       ean13: {
-        icon: "🛍️",
-        description: "European Article Number for retail",
-        features: ["Retail standard", "13 digits", "Global recognition"]
+        title: "EAN-13",
+        description: "European Article Number standard for retail product identification",
+        useCases: ["Retail products", "Point of sale", "Inventory tracking"],
+        specifications: "13-digit GTIN standard"
       },
       upc: {
-        icon: "🏪",
-        description: "Universal Product Code for products",
-        features: ["US/Canada standard", "12 digits", "Point of sale"]
+        title: "UPC-A",
+        description: "Universal Product Code standard for North American retail",
+        useCases: ["Consumer products", "Retail scanning", "Product identification"],
+        specifications: "12-digit GTIN-12 format"
       },
       code39: {
-        icon: "🏭",
-        description: "Code 39 for industrial applications",
-        features: ["Alphanumeric", "Self-checking", "Industrial use"]
+        title: "Code 39",
+        description: "Alphanumeric linear barcode with built-in error checking",
+        useCases: ["Industrial applications", "Healthcare", "Government tracking"],
+        specifications: "Self-checking, alphanumeric"
       },
       datamatrix: {
-        icon: "🔲",
-        description: "2D matrix code for small items",
-        features: ["Compact size", "High reliability", "Small parts marking"]
+        title: "Data Matrix",
+        description: "Compact 2D barcode ideal for marking small components",
+        useCases: ["Component marking", "Electronics", "Medical devices"],
+        specifications: "High data density, error correction"
       }
     };
-    return typeInfo[type] || { icon: "📋", description: "Professional barcode", features: [] };
+    return typeInfo[type] || { 
+      title: "Standard Barcode", 
+      description: "Professional barcode solution", 
+      useCases: [], 
+      specifications: ""
+    };
   };
 
   // Step 1: Barcode Type Selection
   const renderStep1 = () => (
-    <div className="step-container">
-      <div className="step-header">
-        <h2 className="step-title">Choose Your Barcode Type</h2>
-        <p className="step-subtitle">Select the perfect barcode format for your needs</p>
+    <div className="glass-panel main-panel">
+      <div className="panel-header">
+        <h2 className="panel-title">Select Barcode Standard</h2>
+        <p className="panel-subtitle">Choose the appropriate barcode format for your application requirements</p>
       </div>
       
-      <div className="barcode-grid">
+      <div className="barcode-selection-grid">
         {Object.entries(barcodeTypes).map(([key, type]) => {
           const typeInfo = getBarcodeTypeInfo(key);
           return (
             <div
               key={key}
-              className={`barcode-card ${formData.barcodeType === key ? 'selected' : ''}`}
+              className={`barcode-option-card ${formData.barcodeType === key ? 'selected' : ''}`}
               onClick={() => handleInputChange('barcodeType', key)}
             >
-              <div className="barcode-card-header">
-                <span className="barcode-icon">{typeInfo.icon}</span>
-                <h3 className="barcode-title">{type.name}</h3>
+              <div className="card-header">
+                <h3 className="card-title">{typeInfo.title}</h3>
+                <div className="price-display">
+                  <span className="currency">USD</span>
+                  <span className="amount">{type.price.toFixed(2)}</span>
+                  <span className="unit">per unit</span>
+                </div>
               </div>
               
-              <div className="barcode-price">
-                <span className="price-currency">$</span>
-                <span className="price-amount">{type.price}</span>
-                <span className="price-unit">per code</span>
+              <div className="card-content">
+                <p className="description">{typeInfo.description}</p>
+                
+                <div className="specifications">
+                  <div className="spec-item">
+                    <span className="spec-label">Standard:</span>
+                    <span className="spec-value">{typeInfo.specifications}</span>
+                  </div>
+                </div>
+                
+                <div className="use-cases">
+                  <span className="use-cases-label">Applications:</span>
+                  <div className="use-cases-list">
+                    {typeInfo.useCases.map((useCase, idx) => (
+                      <span key={idx} className="use-case-tag">{useCase}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
               
-              <p className="barcode-description">{typeInfo.description}</p>
-              
-              <div className="barcode-features">
-                {typeInfo.features.map((feature, idx) => (
-                  <span key={idx} className="feature-tag">{feature}</span>
-                ))}
-              </div>
-              
-              <div className="barcode-card-footer">
-                <button className="select-btn">
-                  {formData.barcodeType === key ? 'Selected ✓' : 'Select'}
-                </button>
+              <div className="card-footer">
+                <div className="selection-indicator">
+                  {formData.barcodeType === key ? 'Selected' : 'Select'}
+                </div>
               </div>
             </div>
           );
         })}
       </div>
       
-      <div className="step-actions">
+      <div className="panel-actions">
         <button
           onClick={() => handleStepChange(2)}
           disabled={!formData.barcodeType}
-          className="btn-primary btn-next"
+          className="primary-button"
         >
-          Continue to Quantity
-          <span className="btn-arrow">→</span>
+          <span>Continue to Configuration</span>
+          <svg className="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>
   );
 
-  // Step 2: Quantity Selection
+  // Step 2: Quantity Configuration
   const renderStep2 = () => (
-    <div className="step-container">
-      <div className="step-header">
-        <h2 className="step-title">How Many Barcodes?</h2>
-        <p className="step-subtitle">Choose your quantity and see live pricing</p>
+    <div className="glass-panel main-panel">
+      <div className="panel-header">
+        <h2 className="panel-title">Configuration & Pricing</h2>
+        <p className="panel-subtitle">Define quantity parameters and review cost analysis</p>
       </div>
       
-      <div className="quantity-section">
-        <div className="selected-type-info">
-          <span className="selected-icon">{getBarcodeTypeInfo(formData.barcodeType).icon}</span>
-          <div>
-            <h3 className="selected-type">{barcodeTypes[formData.barcodeType]?.name}</h3>
-            <p className="selected-description">{getBarcodeTypeInfo(formData.barcodeType).description}</p>
+      <div className="configuration-container">
+        <div className="selected-standard-info">
+          <div className="standard-details">
+            <h3 className="standard-name">{getBarcodeTypeInfo(formData.barcodeType).title}</h3>
+            <p className="standard-description">{getBarcodeTypeInfo(formData.barcodeType).description}</p>
+            <span className="standard-spec">{getBarcodeTypeInfo(formData.barcodeType).specifications}</span>
           </div>
         </div>
         
-        <div className="quantity-input-container">
-          <label className="quantity-label">Quantity</label>
-          <div className="quantity-controls">
-            <button 
-              className="quantity-btn"
-              onClick={() => {
-                const newQuantity = Math.max(1, formData.quantity - 1);
-                handleInputChange('quantity', newQuantity);
-                if (newQuantity > 0) calculatePrice();
-              }}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min="1"
-              max="10000"
-              value={formData.quantity}
-              onChange={(e) => {
-                const quantity = parseInt(e.target.value) || 1;
-                handleInputChange('quantity', quantity);
-                if (quantity > 0) calculatePrice();
-              }}
-              className="quantity-input"
-            />
-            <button 
-              className="quantity-btn"
-              onClick={() => {
-                const newQuantity = Math.min(10000, formData.quantity + 1);
-                handleInputChange('quantity', newQuantity);
-                calculatePrice();
-              }}
-            >
-              +
-            </button>
+        <div className="quantity-configuration">
+          <div className="input-group">
+            <label className="input-label">Quantity</label>
+            <div className="quantity-controls">
+              <button 
+                type="button"
+                className="quantity-button decrease"
+                onClick={() => {
+                  const newQuantity = Math.max(1, formData.quantity - 1);
+                  handleInputChange('quantity', newQuantity);
+                  if (newQuantity > 0) calculatePrice();
+                }}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="10000"
+                value={formData.quantity}
+                onChange={(e) => {
+                  const quantity = parseInt(e.target.value) || 1;
+                  handleInputChange('quantity', quantity);
+                  if (quantity > 0) calculatePrice();
+                }}
+                className="quantity-input"
+              />
+              <button 
+                type="button"
+                className="quantity-button increase"
+                onClick={() => {
+                  const newQuantity = Math.min(10000, formData.quantity + 1);
+                  handleInputChange('quantity', newQuantity);
+                  calculatePrice();
+                }}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </button>
+            </div>
+            <span className="input-help">Minimum: 1 unit • Maximum: 10,000 units</span>
           </div>
-          <p className="quantity-note">Min: 1 • Max: 10,000</p>
         </div>
         
         {pricing && (
-          <div className="pricing-breakdown">
-            <h3 className="pricing-title">Price Breakdown</h3>
-            <div className="pricing-details">
-              <div className="pricing-row">
-                <span>Unit Price:</span>
-                <span>${barcodeTypes[formData.barcodeType]?.price}</span>
+          <div className="pricing-analysis">
+            <h3 className="analysis-title">Cost Analysis</h3>
+            <div className="pricing-breakdown">
+              <div className="breakdown-row">
+                <span className="breakdown-label">Unit Price</span>
+                <span className="breakdown-value">USD {barcodeTypes[formData.barcodeType]?.price.toFixed(2)}</span>
               </div>
-              <div className="pricing-row">
-                <span>Quantity:</span>
-                <span>{formData.quantity}</span>
+              <div className="breakdown-row">
+                <span className="breakdown-label">Quantity</span>
+                <span className="breakdown-value">{formData.quantity.toLocaleString()} units</span>
               </div>
-              <div className="pricing-row">
-                <span>Subtotal:</span>
-                <span>${pricing.base_amount.toFixed(2)}</span>
+              <div className="breakdown-row">
+                <span className="breakdown-label">Subtotal</span>
+                <span className="breakdown-value">USD {pricing.base_amount.toFixed(2)}</span>
               </div>
-              <div className="pricing-row">
-                <span>Tax ({pricing.igst ? 'IGST' : 'CGST + SGST'}):</span>
-                <span>${pricing.tax_amount.toFixed(2)}</span>
+              <div className="breakdown-row">
+                <span className="breakdown-label">Tax ({pricing.igst ? 'IGST' : 'CGST + SGST'})</span>
+                <span className="breakdown-value">USD {pricing.tax_amount.toFixed(2)}</span>
               </div>
-              <div className="pricing-row total">
-                <span>Total Amount:</span>
-                <span>${pricing.total_amount.toFixed(2)}</span>
+              <div className="breakdown-row total-row">
+                <span className="breakdown-label">Total Amount</span>
+                <span className="breakdown-value">USD {pricing.total_amount.toFixed(2)}</span>
               </div>
             </div>
           </div>
         )}
       </div>
       
-      <div className="step-actions">
-        <button
-          onClick={() => handleStepChange(1)}
-          className="btn-secondary btn-back"
-        >
-          ← Back
+      <div className="panel-actions">
+        <button onClick={() => handleStepChange(1)} className="secondary-button">
+          <svg className="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>Previous</span>
         </button>
         <button
           onClick={() => handleStepChange(3)}
           disabled={!formData.quantity || formData.quantity <= 0}
-          className="btn-primary btn-next"
+          className="primary-button"
         >
-          Continue to Details
-          <span className="btn-arrow">→</span>
+          <span>Continue to Information</span>
+          <svg className="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>
   );
 
-  // Step 3: Customer Details Form
+  // Step 3: Customer Information
   const renderStep3 = () => (
-    <div className="step-container">
-      <div className="step-header">
-        <h2 className="step-title">Your Information</h2>
-        <p className="step-subtitle">We need these details for your order and invoice</p>
+    <div className="glass-panel main-panel">
+      <div className="panel-header">
+        <h2 className="panel-title">Customer Information</h2>
+        <p className="panel-subtitle">Provide billing details and delivery information for order processing</p>
       </div>
       
-      <form className="customer-form">
+      <form className="information-form">
         <div className="form-section">
-          <h3 className="form-section-title">👤 Personal Information</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">First Name *</label>
+          <h3 className="section-title">Personal Details</h3>
+          <div className="form-grid">
+            <div className="form-field">
+              <label className="field-label">First Name *</label>
               <input
                 type="text"
                 value={formData.customerDetails.name}
                 onChange={(e) => handleInputChange('customerDetails.name', e.target.value)}
-                className="form-input"
-                placeholder="Enter your first name"
+                className="field-input"
+                placeholder="Enter first name"
                 required
               />
             </div>
-            <div className="form-group">
-              <label className="form-label">Last Name *</label>
+            <div className="form-field">
+              <label className="field-label">Last Name *</label>
               <input
                 type="text"
                 value={formData.customerDetails.surname}
                 onChange={(e) => handleInputChange('customerDetails.surname', e.target.value)}
-                className="form-input"
-                placeholder="Enter your last name"
+                className="field-input"
+                placeholder="Enter last name"
                 required
               />
             </div>
           </div>
           
-          <div className="form-group">
-            <label className="form-label">Email Address *</label>
+          <div className="form-field">
+            <label className="field-label">Email Address *</label>
             <input
               type="email"
               value={formData.customerDetails.email}
               onChange={(e) => handleInputChange('customerDetails.email', e.target.value)}
-              className="form-input"
-              placeholder="your@email.com"
+              className="field-input"
+              placeholder="name@company.com"
               required
             />
           </div>
           
-          <div className="form-group">
-            <label className="form-label">Phone Number (WhatsApp) *</label>
+          <div className="form-field">
+            <label className="field-label">Phone Number *</label>
             <input
               type="tel"
               value={formData.customerDetails.phone}
               onChange={(e) => handleInputChange('customerDetails.phone', e.target.value)}
-              className="form-input"
-              placeholder="+1 (555) 123-4567"
+              className="field-input"
+              placeholder="+1 (555) 000-0000"
               required
             />
           </div>
         </div>
         
         <div className="form-section">
-          <h3 className="form-section-title">🏢 Business Information</h3>
-          <div className="form-group">
-            <label className="form-label">Organization *</label>
+          <h3 className="section-title">Business Information</h3>
+          <div className="form-field">
+            <label className="field-label">Organization *</label>
             <input
               type="text"
               value={formData.customerDetails.organization}
               onChange={(e) => handleInputChange('customerDetails.organization', e.target.value)}
-              className="form-input"
-              placeholder="Your company name"
+              className="field-input"
+              placeholder="Company name"
               required
             />
           </div>
           
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Country *</label>
+          <div className="form-grid">
+            <div className="form-field">
+              <label className="field-label">Country *</label>
               <input
                 type="text"
                 value={formData.customerDetails.country}
                 onChange={(e) => handleInputChange('customerDetails.country', e.target.value)}
-                className="form-input"
-                placeholder="e.g., United States"
+                className="field-input"
+                placeholder="United States"
                 required
               />
             </div>
-            <div className="form-group">
-              <label className="form-label">State/Province</label>
+            <div className="form-field">
+              <label className="field-label">State/Province</label>
               <input
                 type="text"
                 value={formData.customerDetails.state}
@@ -428,59 +460,61 @@ const BarcodeGeneratorApp = () => {
                   handleInputChange('customerDetails.state', e.target.value);
                   calculatePrice();
                 }}
-                className="form-input"
-                placeholder="e.g., Gujarat (for special tax rate)"
+                className="field-input"
+                placeholder="California"
               />
             </div>
           </div>
           
-          <div className="form-group">
-            <label className="form-label">Business Address *</label>
+          <div className="form-field">
+            <label className="field-label">Business Address *</label>
             <textarea
               value={formData.customerDetails.address}
               onChange={(e) => handleInputChange('customerDetails.address', e.target.value)}
-              className="form-textarea"
+              className="field-textarea"
               rows="3"
-              placeholder="Enter your complete business address"
+              placeholder="Complete business address including postal code"
               required
             />
           </div>
           
-          <div className="form-group">
-            <label className="form-label">GST Number (Optional)</label>
+          <div className="form-field">
+            <label className="field-label">Tax Registration Number</label>
             <input
               type="text"
               value={formData.customerDetails.gst_number}
               onChange={(e) => handleInputChange('customerDetails.gst_number', e.target.value)}
-              className="form-input"
-              placeholder="e.g., 24ABCDE1234F1Z5"
+              className="field-input"
+              placeholder="GST/VAT/TIN registration number"
             />
-            <p className="form-help">Required for businesses in India</p>
+            <span className="field-help">Required for tax-exempt organizations or businesses</span>
           </div>
         </div>
       </form>
       
-      <div className="step-actions">
-        <button
-          onClick={() => handleStepChange(2)}
-          className="btn-secondary btn-back"
-        >
-          ← Back
+      <div className="panel-actions">
+        <button onClick={() => handleStepChange(2)} className="secondary-button">
+          <svg className="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>Previous</span>
         </button>
         <button
           onClick={createOrder}
           disabled={loading || !formData.customerDetails.name || !formData.customerDetails.email}
-          className="btn-primary btn-next"
+          className="primary-button"
         >
           {loading ? (
             <>
-              <span className="loading-spinner"></span>
-              Creating Order...
+              <div className="loading-indicator"></div>
+              <span>Processing Order...</span>
             </>
           ) : (
             <>
-              Create Order
-              <span className="btn-arrow">→</span>
+              <span>Create Order</span>
+              <svg className="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </>
           )}
         </button>
@@ -488,104 +522,125 @@ const BarcodeGeneratorApp = () => {
     </div>
   );
 
-  // Step 4: Order Summary & Payment
+  // Step 4: Order Confirmation & Generation
   const renderStep4 = () => (
-    <div className="step-container">
-      <div className="step-header">
-        <h2 className="step-title">Order Summary</h2>
-        <p className="step-subtitle">Review your order and generate barcodes</p>
+    <div className="glass-panel main-panel">
+      <div className="panel-header">
+        <h2 className="panel-title">Order Confirmation</h2>
+        <p className="panel-subtitle">Review order details and initiate barcode generation</p>
       </div>
       
       {order && (
-        <div className="order-summary">
-          <div className="order-header">
-            <div className="order-id">
-              <span className="order-label">Order ID:</span>
-              <span className="order-value">{order.order_id}</span>
+        <div className="order-confirmation">
+          <div className="order-summary-header">
+            <div className="order-reference">
+              <span className="reference-label">Order Reference</span>
+              <span className="reference-value">{order.order_id}</span>
             </div>
-            <div className="order-status">
-              <span className="status-badge">Ready to Generate</span>
+            <div className="order-status-indicator">
+              <span className="status-badge ready">Ready for Generation</span>
             </div>
           </div>
           
           <div className="order-details-grid">
-            <div className="order-card">
-              <h3 className="card-title">📋 Order Details</h3>
-              <div className="order-item">
-                <span className="item-icon">{getBarcodeTypeInfo(formData.barcodeType).icon}</span>
-                <div className="item-details">
-                  <h4>{barcodeTypes[formData.barcodeType]?.name}</h4>
-                  <p>Quantity: {formData.quantity} codes</p>
+            <div className="detail-card">
+              <h3 className="card-title">Order Specification</h3>
+              <div className="order-specification">
+                <div className="spec-row">
+                  <span className="spec-label">Barcode Standard</span>
+                  <span className="spec-value">{getBarcodeTypeInfo(formData.barcodeType).title}</span>
                 </div>
-                <div className="item-price">
-                  ${order.order.total_amount.toFixed(2)}
+                <div className="spec-row">
+                  <span className="spec-label">Quantity</span>
+                  <span className="spec-value">{formData.quantity.toLocaleString()} units</span>
+                </div>
+                <div className="spec-row">
+                  <span className="spec-label">Unit Price</span>
+                  <span className="spec-value">USD {barcodeTypes[formData.barcodeType]?.price.toFixed(2)}</span>
                 </div>
               </div>
             </div>
             
-            <div className="order-card">
-              <h3 className="card-title">👤 Customer Information</h3>
-              <div className="customer-info">
-                <p><strong>{formData.customerDetails.name} {formData.customerDetails.surname}</strong></p>
-                <p>{formData.customerDetails.organization}</p>
-                <p>{formData.customerDetails.email}</p>
-                <p>{formData.customerDetails.phone}</p>
+            <div className="detail-card">
+              <h3 className="card-title">Customer Information</h3>
+              <div className="customer-summary">
+                <div className="customer-name">{formData.customerDetails.name} {formData.customerDetails.surname}</div>
+                <div className="customer-organization">{formData.customerDetails.organization}</div>
+                <div className="customer-contact">{formData.customerDetails.email}</div>
+                <div className="customer-phone">{formData.customerDetails.phone}</div>
               </div>
             </div>
             
-            <div className="order-card">
-              <h3 className="card-title">💰 Payment Breakdown</h3>
-              <div className="payment-details">
-                <div className="payment-row">
-                  <span>Subtotal:</span>
-                  <span>${order.order.total_amount.toFixed(2)}</span>
+            <div className="detail-card">
+              <h3 className="card-title">Financial Summary</h3>
+              <div className="financial-breakdown">
+                <div className="financial-row">
+                  <span className="financial-label">Subtotal</span>
+                  <span className="financial-value">USD {order.order.total_amount.toFixed(2)}</span>
                 </div>
-                <div className="payment-row">
-                  <span>Tax:</span>
-                  <span>${order.order.tax_amount.toFixed(2)}</span>
+                <div className="financial-row">
+                  <span className="financial-label">Tax</span>
+                  <span className="financial-value">USD {order.order.tax_amount.toFixed(2)}</span>
                 </div>
-                <div className="payment-row total">
-                  <span>Total:</span>
-                  <span>${order.order.final_amount.toFixed(2)}</span>
+                <div className="financial-row total">
+                  <span className="financial-label">Total Amount</span>
+                  <span className="financial-value">USD {order.order.final_amount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="payment-section">
-            <div className="payment-notice">
-              <div className="notice-icon">🔔</div>
+          <div className="generation-section">
+            <div className="payment-status-notice">
               <div className="notice-content">
-                <h4>Payment Integration Coming Soon!</h4>
-                <p>For now, you can generate and download your barcodes directly. Payment integration with Razorpay and PayPal will be added once API keys are provided.</p>
+                <h4 className="notice-title">Payment Integration Pending</h4>
+                <p className="notice-description">
+                  Payment gateway integration will be activated upon API key configuration. 
+                  Currently operating in development mode for barcode generation testing.
+                </p>
               </div>
             </div>
             
             <button
               onClick={processOrder}
               disabled={loading}
-              className="btn-generate"
+              className="generation-button"
             >
               {loading ? (
                 <>
-                  <span className="loading-spinner"></span>
-                  Generating Barcodes...
+                  <div className="loading-indicator"></div>
+                  <span>Generating Barcodes...</span>
                 </>
               ) : (
                 <>
-                  <span className="generate-icon">🎯</span>
-                  Generate & Download Barcodes
+                  <svg className="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Generate & Download Package</span>
                 </>
               )}
             </button>
             
-            <div className="download-info">
-              <h4>📦 What you'll receive:</h4>
-              <ul>
-                <li>✅ Excel file with all barcode data</li>
-                <li>✅ Individual barcode images (PNG format)</li>
-                <li>✅ Invoice with order details</li>
-                <li>✅ Everything packaged in a convenient ZIP file</li>
+            <div className="deliverable-manifest">
+              <h4 className="manifest-title">Package Contents</h4>
+              <ul className="manifest-list">
+                <li className="manifest-item">
+                  <span className="item-icon">📊</span>
+                  <span className="item-description">Excel spreadsheet with barcode data and metadata</span>
+                </li>
+                <li className="manifest-item">
+                  <span className="item-icon">🖼️</span>
+                  <span className="item-description">High-resolution barcode images (PNG format)</span>
+                </li>
+                <li className="manifest-item">
+                  <span className="item-icon">📄</span>
+                  <span className="item-description">Detailed invoice with order information</span>
+                </li>
+                <li className="manifest-item">
+                  <span className="item-icon">📦</span>
+                  <span className="item-description">Compressed archive for efficient delivery</span>
+                </li>
               </ul>
             </div>
           </div>
@@ -594,30 +649,32 @@ const BarcodeGeneratorApp = () => {
     </div>
   );
 
-  // Progress indicator
+  // Professional progress indicator
   const renderProgressIndicator = () => (
-    <div className="progress-container">
-      <div className="progress-bar">
+    <div className="progress-tracker">
+      <div className="progress-rail">
         <div 
-          className="progress-fill" 
-          style={{ width: `${(currentStep / 4) * 100}%` }}
+          className="progress-indicator" 
+          style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
         ></div>
       </div>
       <div className="progress-steps">
         {[
-          { step: 1, label: "Type", icon: "🎯" },
-          { step: 2, label: "Quantity", icon: "📊" },
-          { step: 3, label: "Details", icon: "📝" },
-          { step: 4, label: "Generate", icon: "🚀" }
-        ].map(({ step, label, icon }) => (
+          { step: 1, label: "Selection", description: "Barcode Standard" },
+          { step: 2, label: "Configuration", description: "Quantity & Pricing" },
+          { step: 3, label: "Information", description: "Customer Details" },
+          { step: 4, label: "Generation", description: "Order Processing" }
+        ].map(({ step, label, description }) => (
           <div key={step} className="progress-step-container">
             <div
-              className={`progress-step ${currentStep >= step ? 'active' : ''} ${currentStep === step ? 'current' : ''}`}
+              className={`progress-step ${currentStep >= step ? 'completed' : ''} ${currentStep === step ? 'active' : ''}`}
             >
-              <span className="step-icon">{icon}</span>
               <span className="step-number">{step}</span>
             </div>
-            <span className="step-label">{label}</span>
+            <div className="step-meta">
+              <span className="step-label">{label}</span>
+              <span className="step-description">{description}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -625,37 +682,34 @@ const BarcodeGeneratorApp = () => {
   );
 
   return (
-    <div className="app-container">
-      {/* Header */}
-      <header className="app-header">
-        <div className="header-content">
-          <div className="logo-section">
-            <h1 className="app-title">
-              <span className="logo-icon">📊</span>
-              BarcodeGen Pro
-            </h1>
-            <p className="app-tagline">Professional barcode generation made simple</p>
+    <div className="application-container">
+      {/* Application Header */}
+      <header className="application-header">
+        <div className="header-container">
+          <div className="brand-section">
+            <h1 className="application-title">Barcode Generation Platform</h1>
+            <p className="application-tagline">Enterprise-grade barcode solutions with professional delivery</p>
           </div>
-          <div className="header-stats">
-            <div className="stat-item">
-              <span className="stat-number">6</span>
-              <span className="stat-label">Barcode Types</span>
+          <div className="capability-indicators">
+            <div className="indicator-item">
+              <span className="indicator-value">6</span>
+              <span className="indicator-label">Standards</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-number">10K+</span>
-              <span className="stat-label">Max Quantity</span>
+            <div className="indicator-item">
+              <span className="indicator-value">10K</span>
+              <span className="indicator-label">Max Units</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-number">⚡</span>
-              <span className="stat-label">Instant Download</span>
+            <div className="indicator-item">
+              <span className="indicator-value">ISO</span>
+              <span className="indicator-label">Compliant</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="main-content">
-        <div className="container">
+      {/* Main Application Content */}
+      <main className="application-main">
+        <div className="content-container">
           {renderProgressIndicator()}
           
           <div className="step-content">
@@ -667,16 +721,18 @@ const BarcodeGeneratorApp = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="app-footer">
-        <div className="footer-content">
-          <p>© 2024 BarcodeGen Pro. Professional barcode generation service.</p>
-          <div className="footer-links">
-            <span>Secure</span>
-            <span>•</span>
-            <span>Reliable</span>
-            <span>•</span>
-            <span>Fast</span>
+      {/* Application Footer */}
+      <footer className="application-footer">
+        <div className="footer-container">
+          <div className="footer-content">
+            <span className="copyright">© 2024 Barcode Generation Platform</span>
+            <div className="footer-links">
+              <span className="footer-link">Enterprise Solutions</span>
+              <span className="footer-separator">•</span>
+              <span className="footer-link">API Documentation</span>
+              <span className="footer-separator">•</span>
+              <span className="footer-link">Support</span>
+            </div>
           </div>
         </div>
       </footer>
