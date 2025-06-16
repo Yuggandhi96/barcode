@@ -16,7 +16,7 @@ const BarcodeGeneratorApp = () => {
       name: '',
       surname: '',
       organization: '',
-      country: '',
+      country: 'India',
       address: '',
       phone: '',
       email: '',
@@ -131,6 +131,16 @@ const BarcodeGeneratorApp = () => {
     }
   };
 
+  // Format Indian Rupees
+  const formatINR = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   // Professional barcode type configurations
   const getBarcodeTypeInfo = (type) => {
     const typeInfo = {
@@ -199,8 +209,8 @@ const BarcodeGeneratorApp = () => {
               <div className="card-header">
                 <h3 className="card-title">{typeInfo.title}</h3>
                 <div className="price-display">
-                  <span className="currency">USD</span>
-                  <span className="amount">{type.price.toFixed(2)}</span>
+                  <span className="currency">INR</span>
+                  <span className="amount">{formatINR(type.price)}</span>
                   <span className="unit">per unit</span>
                 </div>
               </div>
@@ -320,23 +330,23 @@ const BarcodeGeneratorApp = () => {
             <div className="pricing-breakdown">
               <div className="breakdown-row">
                 <span className="breakdown-label">Unit Price</span>
-                <span className="breakdown-value">USD {barcodeTypes[formData.barcodeType]?.price.toFixed(2)}</span>
+                <span className="breakdown-value">{formatINR(barcodeTypes[formData.barcodeType]?.price)}</span>
               </div>
               <div className="breakdown-row">
                 <span className="breakdown-label">Quantity</span>
-                <span className="breakdown-value">{formData.quantity.toLocaleString()} units</span>
+                <span className="breakdown-value">{formData.quantity.toLocaleString('en-IN')} units</span>
               </div>
               <div className="breakdown-row">
                 <span className="breakdown-label">Subtotal</span>
-                <span className="breakdown-value">USD {pricing.base_amount.toFixed(2)}</span>
+                <span className="breakdown-value">{formatINR(pricing.base_amount)}</span>
               </div>
               <div className="breakdown-row">
                 <span className="breakdown-label">Tax ({pricing.igst ? 'IGST' : 'CGST + SGST'})</span>
-                <span className="breakdown-value">USD {pricing.tax_amount.toFixed(2)}</span>
+                <span className="breakdown-value">{formatINR(pricing.tax_amount)}</span>
               </div>
               <div className="breakdown-row total-row">
                 <span className="breakdown-label">Total Amount</span>
-                <span className="breakdown-value">USD {pricing.total_amount.toFixed(2)}</span>
+                <span className="breakdown-value">{formatINR(pricing.total_amount)}</span>
               </div>
             </div>
           </div>
@@ -413,13 +423,13 @@ const BarcodeGeneratorApp = () => {
           </div>
           
           <div className="form-field">
-            <label className="field-label">Phone Number *</label>
+            <label className="field-label">Phone Number (WhatsApp) *</label>
             <input
               type="tel"
               value={formData.customerDetails.phone}
               onChange={(e) => handleInputChange('customerDetails.phone', e.target.value)}
               className="field-input"
-              placeholder="+1 (555) 000-0000"
+              placeholder="+91 98765 43210"
               required
             />
           </div>
@@ -447,12 +457,12 @@ const BarcodeGeneratorApp = () => {
                 value={formData.customerDetails.country}
                 onChange={(e) => handleInputChange('customerDetails.country', e.target.value)}
                 className="field-input"
-                placeholder="United States"
+                placeholder="India"
                 required
               />
             </div>
             <div className="form-field">
-              <label className="field-label">State/Province</label>
+              <label className="field-label">State *</label>
               <input
                 type="text"
                 value={formData.customerDetails.state}
@@ -461,8 +471,10 @@ const BarcodeGeneratorApp = () => {
                   calculatePrice();
                 }}
                 className="field-input"
-                placeholder="California"
+                placeholder="Gujarat (for CGST+SGST) or other state"
+                required
               />
+              <span className="field-help">Enter 'Gujarat' for CGST+SGST (9%+9%) or other state name for IGST (18%)</span>
             </div>
           </div>
           
@@ -473,21 +485,21 @@ const BarcodeGeneratorApp = () => {
               onChange={(e) => handleInputChange('customerDetails.address', e.target.value)}
               className="field-textarea"
               rows="3"
-              placeholder="Complete business address including postal code"
+              placeholder="Complete business address including PIN code"
               required
             />
           </div>
           
           <div className="form-field">
-            <label className="field-label">Tax Registration Number</label>
+            <label className="field-label">GST Registration Number</label>
             <input
               type="text"
               value={formData.customerDetails.gst_number}
               onChange={(e) => handleInputChange('customerDetails.gst_number', e.target.value)}
               className="field-input"
-              placeholder="GST/VAT/TIN registration number"
+              placeholder="e.g., 24ABCDE1234F1Z5"
             />
-            <span className="field-help">Required for tax-exempt organizations or businesses</span>
+            <span className="field-help">15-digit GST number for registered businesses in India</span>
           </div>
         </div>
       </form>
@@ -552,11 +564,11 @@ const BarcodeGeneratorApp = () => {
                 </div>
                 <div className="spec-row">
                   <span className="spec-label">Quantity</span>
-                  <span className="spec-value">{formData.quantity.toLocaleString()} units</span>
+                  <span className="spec-value">{formData.quantity.toLocaleString('en-IN')} units</span>
                 </div>
                 <div className="spec-row">
                   <span className="spec-label">Unit Price</span>
-                  <span className="spec-value">USD {barcodeTypes[formData.barcodeType]?.price.toFixed(2)}</span>
+                  <span className="spec-value">{formatINR(barcodeTypes[formData.barcodeType]?.price)}</span>
                 </div>
               </div>
             </div>
@@ -568,6 +580,7 @@ const BarcodeGeneratorApp = () => {
                 <div className="customer-organization">{formData.customerDetails.organization}</div>
                 <div className="customer-contact">{formData.customerDetails.email}</div>
                 <div className="customer-phone">{formData.customerDetails.phone}</div>
+                <div className="customer-location">{formData.customerDetails.state}, {formData.customerDetails.country}</div>
               </div>
             </div>
             
@@ -576,15 +589,15 @@ const BarcodeGeneratorApp = () => {
               <div className="financial-breakdown">
                 <div className="financial-row">
                   <span className="financial-label">Subtotal</span>
-                  <span className="financial-value">USD {order.order.total_amount.toFixed(2)}</span>
+                  <span className="financial-value">{formatINR(order.order.total_amount)}</span>
                 </div>
                 <div className="financial-row">
-                  <span className="financial-label">Tax</span>
-                  <span className="financial-value">USD {order.order.tax_amount.toFixed(2)}</span>
+                  <span className="financial-label">Tax (GST)</span>
+                  <span className="financial-value">{formatINR(order.order.tax_amount)}</span>
                 </div>
                 <div className="financial-row total">
                   <span className="financial-label">Total Amount</span>
-                  <span className="financial-value">USD {order.order.final_amount.toFixed(2)}</span>
+                  <span className="financial-value">{formatINR(order.order.final_amount)}</span>
                 </div>
               </div>
             </div>
@@ -595,7 +608,7 @@ const BarcodeGeneratorApp = () => {
               <div className="notice-content">
                 <h4 className="notice-title">Payment Integration Pending</h4>
                 <p className="notice-description">
-                  Payment gateway integration will be activated upon API key configuration. 
+                  Razorpay and PayPal payment integration will be activated upon API key configuration. 
                   Currently operating in development mode for barcode generation testing.
                 </p>
               </div>
@@ -635,7 +648,7 @@ const BarcodeGeneratorApp = () => {
                 </li>
                 <li className="manifest-item">
                   <span className="item-icon">📄</span>
-                  <span className="item-description">Detailed invoice with order information</span>
+                  <span className="item-description">GST invoice with complete order details</span>
                 </li>
                 <li className="manifest-item">
                   <span className="item-icon">📦</span>
@@ -688,7 +701,7 @@ const BarcodeGeneratorApp = () => {
         <div className="header-container">
           <div className="brand-section">
             <h1 className="application-title">Barcode Generation Platform</h1>
-            <p className="application-tagline">Enterprise-grade barcode solutions with professional delivery</p>
+            <p className="application-tagline">Professional barcode solutions for Indian businesses</p>
           </div>
           <div className="capability-indicators">
             <div className="indicator-item">
@@ -696,11 +709,11 @@ const BarcodeGeneratorApp = () => {
               <span className="indicator-label">Standards</span>
             </div>
             <div className="indicator-item">
-              <span className="indicator-value">10K</span>
-              <span className="indicator-label">Max Units</span>
+              <span className="indicator-value">₹120+</span>
+              <span className="indicator-label">Starting Price</span>
             </div>
             <div className="indicator-item">
-              <span className="indicator-value">ISO</span>
+              <span className="indicator-value">GST</span>
               <span className="indicator-label">Compliant</span>
             </div>
           </div>
@@ -725,11 +738,11 @@ const BarcodeGeneratorApp = () => {
       <footer className="application-footer">
         <div className="footer-container">
           <div className="footer-content">
-            <span className="copyright">© 2024 Barcode Generation Platform</span>
+            <span className="copyright">© 2024 Barcode Generation Platform - Made in India</span>
             <div className="footer-links">
-              <span className="footer-link">Enterprise Solutions</span>
+              <span className="footer-link">GST Compliant</span>
               <span className="footer-separator">•</span>
-              <span className="footer-link">API Documentation</span>
+              <span className="footer-link">Indian Pricing</span>
               <span className="footer-separator">•</span>
               <span className="footer-link">Support</span>
             </div>

@@ -80,17 +80,17 @@ class PaymentDetails(BaseModel):
     transaction_id: Optional[str] = None
     payment_status: str = "pending"
 
-# Barcode Configuration
+# Barcode Configuration - Prices in Indian Rupees (INR)
 BARCODE_TYPES = {
-    "qr_code": {"name": "QR Code", "price": 2.0},
-    "code128": {"name": "Code 128", "price": 1.5},
-    "ean13": {"name": "EAN-13", "price": 1.8},
-    "upc": {"name": "UPC-A", "price": 1.8},
-    "code39": {"name": "Code 39", "price": 1.5},
-    "datamatrix": {"name": "Data Matrix", "price": 2.2}
+    "qr_code": {"name": "QR Code", "price": 150.0},  # ₹150 per barcode
+    "code128": {"name": "Code 128", "price": 120.0},  # ₹120 per barcode
+    "ean13": {"name": "EAN-13", "price": 140.0},  # ₹140 per barcode
+    "upc": {"name": "UPC-A", "price": 140.0},  # ₹140 per barcode
+    "code39": {"name": "Code 39", "price": 120.0},  # ₹120 per barcode
+    "datamatrix": {"name": "Data Matrix", "price": 180.0}  # ₹180 per barcode
 }
 
-# Tax Configuration
+# Tax Configuration for India
 TAX_RATES = {
     "gujarat": {"cgst": 9.0, "sgst": 9.0, "total": 18.0},
     "other": {"igst": 18.0, "total": 18.0}
@@ -98,7 +98,7 @@ TAX_RATES = {
 
 # Utility Functions
 def calculate_tax_and_total(base_amount: float, state: str) -> Dict[str, float]:
-    """Calculate tax and total amount based on state"""
+    """Calculate tax and total amount based on state (for India)"""
     if state.lower() == "gujarat":
         tax_amount = base_amount * 0.18
         return {
@@ -158,7 +158,7 @@ def create_barcode_image(barcode_data: str, barcode_type: str) -> str:
         return ""
 
 def create_invoice_data(order: BarcodeOrder, tax_details: Dict) -> Dict:
-    """Create invoice data structure"""
+    """Create invoice data structure with INR currency"""
     return {
         "order_id": order.id,
         "customer": order.customer_details.dict(),
@@ -170,6 +170,7 @@ def create_invoice_data(order: BarcodeOrder, tax_details: Dict) -> Dict:
         }],
         "tax_details": tax_details,
         "total_amount": order.final_amount,
+        "currency": "INR",
         "date": order.created_at.strftime("%Y-%m-%d")
     }
 
@@ -180,12 +181,12 @@ async def root():
 
 @api_router.get("/barcode-types")
 async def get_barcode_types():
-    """Get available barcode types and their prices"""
-    return {"barcode_types": BARCODE_TYPES}
+    """Get available barcode types and their prices in INR"""
+    return {"barcode_types": BARCODE_TYPES, "currency": "INR"}
 
 @api_router.post("/calculate-price")
 async def calculate_price(barcode_type: str, quantity: int, state: str = "other"):
-    """Calculate price including tax for given barcode type and quantity"""
+    """Calculate price including tax for given barcode type and quantity (in INR)"""
     if barcode_type not in BARCODE_TYPES:
         raise HTTPException(status_code=400, detail="Invalid barcode type")
     
@@ -201,18 +202,19 @@ async def calculate_price(barcode_type: str, quantity: int, state: str = "other"
         "barcode_type": barcode_type,
         "quantity": quantity,
         "unit_price": base_price,
-        "pricing": tax_details
+        "pricing": tax_details,
+        "currency": "INR"
     }
 
 @api_router.post("/create-order")
 async def create_order(order_data: BarcodeOrderCreate):
-    """Create a new barcode order"""
+    """Create a new barcode order with INR pricing"""
     try:
         # Validate barcode type
         if order_data.barcode_type not in BARCODE_TYPES:
             raise HTTPException(status_code=400, detail="Invalid barcode type")
         
-        # Calculate pricing
+        # Calculate pricing in INR
         base_price = BARCODE_TYPES[order_data.barcode_type]["price"]
         base_amount = base_price * order_data.quantity
         
@@ -236,6 +238,7 @@ async def create_order(order_data: BarcodeOrderCreate):
             "order_id": order.id,
             "order": order.dict(),
             "tax_details": tax_details,
+            "currency": "INR",
             "message": "Order created successfully"
         }
         
@@ -316,7 +319,7 @@ async def process_order(order_id: str):
                     img_data = base64.b64decode(img_base64)
                     zip_file.writestr(f"barcodes/{bc['id']}.png", img_data)
             
-            # Create invoice data
+            # Create invoice data with INR
             state = order.customer_details.state or "other"
             tax_details = calculate_tax_and_total(order.total_amount, state)
             invoice_data = create_invoice_data(order, tax_details)
