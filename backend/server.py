@@ -351,6 +351,12 @@ async def process_order(order_id: str):
 async def list_orders(limit: int = 50):
     """List all orders with pagination"""
     orders = await db.barcode_orders.find().limit(limit).to_list(limit)
+    
+    # Convert MongoDB ObjectId to string for JSON serialization
+    for order in orders:
+        if "_id" in order:
+            order["_id"] = str(order["_id"])
+    
     return {"orders": orders}
 
 # Include the router in the main app
