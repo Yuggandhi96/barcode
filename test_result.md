@@ -248,3 +248,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Implemented complete barcode generation website with multi-step form, barcode generation for 6 different types, tax calculation, order management, and file processing. All core functionality is ready for testing. Payment integration is pending (will be added later with Razorpay/PayPal). Need to test all backend APIs and frontend functionality."
+  - agent: "testing"
+    message: "Completed testing of all backend APIs. Found and fixed an issue with MongoDB ObjectId serialization in order retrieval and listing APIs. All backend functionality is now working correctly. The barcode generation, tax calculation, order management, and file processing systems are fully functional. Created comprehensive backend_test.py that tests all API endpoints with various scenarios and edge cases."
