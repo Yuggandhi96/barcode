@@ -249,6 +249,10 @@ async def get_order(order_id: str):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
+    # Convert MongoDB ObjectId to string to make it JSON serializable
+    if "_id" in order:
+        order["_id"] = str(order["_id"])
+    
     return order
 
 @api_router.post("/process-order/{order_id}")
@@ -259,6 +263,10 @@ async def process_order(order_id: str):
         order_data = await db.barcode_orders.find_one({"id": order_id})
         if not order_data:
             raise HTTPException(status_code=404, detail="Order not found")
+        
+        # Convert MongoDB ObjectId to string
+        if "_id" in order_data:
+            order_data["_id"] = str(order_data["_id"])
         
         order = BarcodeOrder(**order_data)
         
